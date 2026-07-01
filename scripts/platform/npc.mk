@@ -5,9 +5,9 @@ AM_SRCS := riscv/npc/start.S \
            riscv/npc/input.c \
            riscv/npc/cte.c \
            riscv/npc/trap.S \
+           riscv/npc/gpu.c \
            platform/dummy/vme.c \
            platform/dummy/mpe.c
-
 CFLAGS    += -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/scripts/linker.ld
 LDFLAGS   += --defsym=_pmem_start=0x80000000 --defsym=_entry_offset=0x0
