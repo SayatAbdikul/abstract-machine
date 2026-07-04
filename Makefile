@@ -122,7 +122,7 @@ $(ARCHIVE): $(OBJS)
 	@$(AR) rcs $@ $^
 else
 # $(1): library name
-define LIB_TEMPLATE =
+define LIB_TEMPLATE
 $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a: force
 	@$$(MAKE) -s -C $$(AM_HOME)/$(1) archive
 LINKAGE += $$(AM_HOME)/$(1)/build/$(1)-$$(ARCH).a
