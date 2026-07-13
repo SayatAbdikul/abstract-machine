@@ -47,6 +47,39 @@ void putch(char ch) {
   *UART_TX = (uint8_t)ch;
 }
 
+static void putstr(const char *s) {
+  while (*s != '\0') putch(*s++);
+}
+
+static void puthex32(uint32_t value) {
+  static const char digits[] = "0123456789abcdef";
+
+  for (int shift = 28; shift >= 0; shift -= 4) {
+    putch(digits[(value >> shift) & 0xf]);
+  }
+}
+
+static uint32_t read_mvendorid(void) {
+  uint32_t value;
+  asm volatile("csrr %0, 0xf11" : "=r"(value));
+  return value;
+}
+
+static uint32_t read_marchid(void) {
+  uint32_t value;
+  asm volatile("csrr %0, 0xf12" : "=r"(value));
+  return value;
+}
+
+static void print_cpu_identity(void) {
+  putstr("mvendorid = ");
+  puthex32(read_mvendorid());
+  putch('\n');
+  putstr("marchid   = ");
+  puthex32(read_marchid());
+  putch('\n');
+}
+
 void halt(int code) {
   putch(code == 0 ? 'G' : 'B');
   putch('\n');
@@ -59,6 +92,7 @@ void halt(int code) {
 
 void _trm_init() {
   uart_init();
+  print_cpu_identity();
 
   heap.start = &_heap_start;
   heap.end = &_heap_end;
