@@ -1,7 +1,8 @@
 AM_SRCS := riscv/ysyxsoc/start.S \
            riscv/ysyxsoc/trm.c \
            riscv/ysyxsoc/spi.c \
-           platform/dummy/ioe.c \
+           riscv/ysyxsoc/ioe.c \
+           riscv/ysyxsoc/timer.c \
            platform/dummy/cte.c \
            platform/dummy/vme.c \
            platform/dummy/mpe.c
@@ -11,7 +12,7 @@ LDSCRIPTS += $(AM_HOME)/am/src/riscv/ysyxsoc/linker.ld
 LDFLAGS   += --gc-sections -e _start -Map=$(IMAGE).map
 
 NPC_HOME ?= $(AM_HOME)/../npc
-YSYXSOC_RUN_ARGS ?= --cycles=20000 --reset-cycles=20
+YSYXSOC_RUN_ARGS ?= --cycles=2000000 --reset-cycles=20
 
 image: image-dep
 	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
@@ -21,5 +22,5 @@ image: image-dep
 run: image
 	$(MAKE) -C $(NPC_HOME) ysyxsoc-build
 	$(NPC_HOME)/build/ysyxsoc/VysyxSoCFull \
-		--mrom=$(IMAGE).bin \
+		--flash=$(IMAGE).bin \
 		$(YSYXSOC_RUN_ARGS)
