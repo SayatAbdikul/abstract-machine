@@ -7,7 +7,7 @@ AM_SRCS := riscv/ysyxsoc/start.S \
 
 CFLAGS    += -fdata-sections -ffunction-sections
 LDSCRIPTS += $(AM_HOME)/am/src/riscv/ysyxsoc/linker.ld
-LDFLAGS   += --gc-sections -e _start
+LDFLAGS   += --gc-sections -e _start -Map=$(IMAGE).map
 
 NPC_HOME ?= $(AM_HOME)/../npc
 YSYXSOC_RUN_ARGS ?= --cycles=20000 --reset-cycles=20

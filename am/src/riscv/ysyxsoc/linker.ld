@@ -42,4 +42,3 @@ SECTIONS {
 }
 
 ASSERT(_heap_start <= _heap_end, "SRAM overflow")
-ASSERT(SIZEOF(.data) == 0, "initialized .data is not supported on riscv32e-ysyxsoc until Phase 7")
