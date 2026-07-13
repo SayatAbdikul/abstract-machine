@@ -1,0 +1,26 @@
+AM_SRCS := riscv/ysyxsoc/start.S \
+           riscv/ysyxsoc/trm.c \
+           riscv/ysyxsoc/spi.c \
+           riscv/ysyxsoc/ioe.c \
+           riscv/ysyxsoc/timer.c \
+           platform/dummy/cte.c \
+           platform/dummy/vme.c \
+           platform/dummy/mpe.c
+
+CFLAGS    += -fdata-sections -ffunction-sections
+LDSCRIPTS += $(AM_HOME)/am/src/riscv/ysyxsoc/linker-mrom.ld
+LDFLAGS   += --gc-sections -e _start -Map=$(IMAGE).map
+
+NPC_HOME ?= $(AM_HOME)/../npc
+YSYXSOC_RUN_ARGS ?= --cycles=2000000 --reset-cycles=20
+
+image: image-dep
+	@$(OBJDUMP) -d $(IMAGE).elf > $(IMAGE).txt
+	@echo + OBJCOPY "->" $(IMAGE_REL).bin
+	@$(OBJCOPY) -S -O binary $(IMAGE).elf $(IMAGE).bin
+
+run: image
+	$(MAKE) -C $(NPC_HOME) ysyxsoc-mrom-build
+	$(NPC_HOME)/build/ysyxsoc-mrom/VysyxSoCFull \
+		--mrom=$(IMAGE).bin \
+		$(YSYXSOC_RUN_ARGS)
