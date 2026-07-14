@@ -21,6 +21,15 @@ static volatile uint8_t *uart_reg(uint32_t offset) {
 extern char _heap_start;
 extern char _heap_end;
 
+#ifdef YSYXSOC_REPORT_MEMORY_LAYOUT
+extern char _data_start;
+extern char _data_end;
+extern char _bss_start;
+extern char _bss_end;
+extern char _stack_bottom;
+extern char _stack_pointer;
+#endif
+
 int main(const char *args);
 
 #define YSYX_STRINGIFY_INNER(value) #value
@@ -64,6 +73,29 @@ static void puthex32(uint32_t value) {
   }
 }
 
+#ifdef YSYXSOC_REPORT_MEMORY_LAYOUT
+static void putrange(const char *name, const char *start, const char *end) {
+  putstr(name);
+  putstr("=[0x");
+  puthex32((uintptr_t)start);
+  putstr(",0x");
+  puthex32((uintptr_t)end);
+  putch(')');
+}
+
+static void print_memory_layout(void) {
+  putstr("MEMORY ");
+  putrange("data", &_data_start, &_data_end);
+  putch(' ');
+  putrange("bss", &_bss_start, &_bss_end);
+  putch(' ');
+  putrange("heap", &_heap_start, &_heap_end);
+  putch(' ');
+  putrange("stack", &_stack_bottom, &_stack_pointer);
+  putch('\n');
+}
+#endif
+
 static uint32_t read_mvendorid(void) {
   uint32_t value;
   asm volatile("csrr %0, 0xf11" : "=r"(value));
@@ -101,6 +133,10 @@ void _trm_init() {
 
   heap.start = &_heap_start;
   heap.end = &_heap_end;
+
+#ifdef YSYXSOC_REPORT_MEMORY_LAYOUT
+  print_memory_layout();
+#endif
 
   int ret = main(mainargs);
   halt(ret);

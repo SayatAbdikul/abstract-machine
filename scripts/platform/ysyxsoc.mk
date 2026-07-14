@@ -8,7 +8,8 @@ AM_SRCS := riscv/ysyxsoc/start.S \
            platform/dummy/mpe.c
 
 CFLAGS    += -fdata-sections -ffunction-sections
-LDSCRIPTS += $(AM_HOME)/am/src/riscv/ysyxsoc/linker.ld
+YSYXSOC_LINKER_SCRIPT ?= linker.ld
+LDSCRIPTS += $(AM_HOME)/am/src/riscv/ysyxsoc/$(YSYXSOC_LINKER_SCRIPT)
 LDFLAGS   += --gc-sections -e _start -Map=$(IMAGE).map
 
 MAINARGS_MAX_LEN = 256
