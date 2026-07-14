@@ -23,6 +23,11 @@ extern char _heap_end;
 
 int main(const char *args);
 
+#define YSYX_STRINGIFY_INNER(value) #value
+#define YSYX_STRINGIFY(value) YSYX_STRINGIFY_INNER(value)
+static const char mainargs[MAINARGS_MAX_LEN] =
+    YSYX_STRINGIFY(MAINARGS_PLACEHOLDER);  // patched after objcopy
+
 static void uart_init(void) {
   // Enable divisor-latch access.
   *uart_reg(UART_LCR) = UART_LCR_DLAB;
@@ -97,6 +102,6 @@ void _trm_init() {
   heap.start = &_heap_start;
   heap.end = &_heap_end;
 
-  int ret = main("");
+  int ret = main(mainargs);
   halt(ret);
 }
