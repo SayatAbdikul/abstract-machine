@@ -12,6 +12,14 @@
 void __am_timer_init(void);
 void __am_timer_rtc(AM_TIMER_RTC_T *rtc);
 void __am_timer_uptime(AM_TIMER_UPTIME_T *uptime);
+#ifdef YSYXSOC_HAS_GRAPHICS_IOE
+void __am_input_init(void);
+void __am_input_config(AM_INPUT_CONFIG_T *config);
+void __am_input_keybrd(AM_INPUT_KEYBRD_T *event);
+void __am_gpu_config(AM_GPU_CONFIG_T *config);
+void __am_gpu_status(AM_GPU_STATUS_T *status);
+void __am_gpu_fbdraw(AM_GPU_FBDRAW_T *draw);
+#endif
 
 typedef void (*handler_t)(void *buf);
 
@@ -55,6 +63,13 @@ static handler_t lut[128] = {
   [AM_TIMER_CONFIG] = (handler_t)timer_config,
   [AM_TIMER_RTC] = (handler_t)__am_timer_rtc,
   [AM_TIMER_UPTIME] = (handler_t)__am_timer_uptime,
+#ifdef YSYXSOC_HAS_GRAPHICS_IOE
+  [AM_INPUT_CONFIG] = (handler_t)__am_input_config,
+  [AM_INPUT_KEYBRD] = (handler_t)__am_input_keybrd,
+  [AM_GPU_CONFIG] = (handler_t)__am_gpu_config,
+  [AM_GPU_STATUS] = (handler_t)__am_gpu_status,
+  [AM_GPU_FBDRAW] = (handler_t)__am_gpu_fbdraw,
+#endif
 };
 
 bool ioe_init(void) {
@@ -62,6 +77,9 @@ bool ioe_init(void) {
     if (lut[i] == NULL) lut[i] = fail;
   }
   __am_timer_init();
+#ifdef YSYXSOC_HAS_GRAPHICS_IOE
+  __am_input_init();
+#endif
   return true;
 }
 

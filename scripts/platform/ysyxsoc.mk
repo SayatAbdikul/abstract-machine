@@ -2,12 +2,15 @@ AM_SRCS := riscv/ysyxsoc/start.S \
            riscv/ysyxsoc/trm.c \
            riscv/ysyxsoc/spi.c \
            riscv/ysyxsoc/ioe.c \
+           riscv/ysyxsoc/input.c \
+           riscv/ysyxsoc/gpu.c \
            riscv/ysyxsoc/timer.c \
            platform/dummy/cte.c \
            platform/dummy/vme.c \
            platform/dummy/mpe.c
 
 CFLAGS    += -fdata-sections -ffunction-sections
+CFLAGS    += -DYSYXSOC_HAS_GRAPHICS_IOE=1
 YSYXSOC_LINKER_SCRIPT ?= linker.ld
 LDSCRIPTS += $(AM_HOME)/am/src/riscv/ysyxsoc/$(YSYXSOC_LINKER_SCRIPT)
 LDFLAGS   += --gc-sections -e _start -Map=$(IMAGE).map
