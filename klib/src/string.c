@@ -50,7 +50,19 @@ int strncmp(const char *s1, const char *s2, size_t n) {
 
 void *memset(void *s, int c, size_t n) {
   unsigned char *p = s;
-  for (size_t i = 0; i < n; i++) p[i] = (unsigned char)c;
+  const unsigned char byte = (unsigned char)c;
+  while (n != 0 && ((uintptr_t)p & (sizeof(uint32_t) - 1u)) != 0u) {
+    *p++ = byte;
+    n--;
+  }
+  const uint32_t word = (uint32_t)byte * 0x01010101u;
+  uint32_t *words = (uint32_t *)p;
+  while (n >= sizeof(uint32_t)) {
+    *words++ = word;
+    n -= sizeof(uint32_t);
+  }
+  p = (unsigned char *)words;
+  while (n-- != 0) *p++ = byte;
   return s;
 }
 

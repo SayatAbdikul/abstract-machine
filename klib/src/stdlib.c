@@ -4,6 +4,7 @@
 
 #if !defined(__ISA_NATIVE__) || defined(__NATIVE_USE_KLIB__)
 static unsigned long int next = 1;
+static uintptr_t heap_brk;
 
 int rand(void) {
   // RAND_MAX assumed to be 32767
@@ -33,24 +34,28 @@ void *malloc(size_t size) {
   // On native, malloc() will be called during initializaion of C runtime.
   // Therefore do not call panic() here, else it will yield a dead recursion:
   //   panic() -> putchar() -> (glibc) -> malloc() -> panic()
-  static uintptr_t brk = 0;
   const uintptr_t align = sizeof(uintptr_t);
 
   if (size == 0 || heap.start == NULL || heap.end == NULL) {
     return NULL;
   }
 
-  if (brk == 0) {
-    brk = (uintptr_t)heap.start;
+  if (heap_brk < (uintptr_t)heap.start || heap_brk > (uintptr_t)heap.end) {
+    heap_brk = (uintptr_t)heap.start;
   }
 
-  brk = (brk + align - 1) & ~(align - 1);
+  heap_brk = (heap_brk + align - 1) & ~(align - 1);
   size = (size + align - 1) & ~(align - 1);
 
-  uintptr_t ret = brk;
-  brk += size;
-  assert(brk <= (uintptr_t)heap.end);
+  uintptr_t ret = heap_brk;
+  heap_brk += size;
+  assert(heap_brk <= (uintptr_t)heap.end);
   return (void *)ret;
+}
+
+void __am_klib_reset_heap(Area area) {
+  heap = area;
+  heap_brk = (uintptr_t)area.start;
 }
 
 void free(void *ptr) {
