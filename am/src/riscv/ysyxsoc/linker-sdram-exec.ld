@@ -11,11 +11,22 @@ _sdram_start = ORIGIN(sdram);
 _sdram_end = ORIGIN(sdram) + LENGTH(sdram);
 _stack_bottom = _sram_end - 0x400;
 _stack_pointer = _sram_end;
+PHASE11_TEXT_PAD = DEFINED(PHASE11_TEXT_PAD) ? PHASE11_TEXT_PAD : 0;
 
 SECTIONS {
   . = ORIGIN(sdram);
   _image_start = .;
-  .text : { _text_start = .; KEEP(*(entry)) *(.text*) _text_end = .; } > sdram
+  .phase11_text_pad ORIGIN(sdram) : {
+    /* Emit real file bytes so ld cannot collapse the requested alignment.
+     * The fixed 16-byte prefix keeps pad=0 on a cache-block boundary. */
+    BYTE(0)
+  } > sdram
+  .text ORIGIN(sdram) + 16 + PHASE11_TEXT_PAD : {
+    _text_start = .;
+    KEEP(*(entry))
+    *(.text*)
+    _text_end = .;
+  } > sdram
   .rodata : {
     . = ALIGN(4); _rodata_start = .;
     *(.rodata*) *(.srodata*) *(.eh_frame*) *(.gcc_except_table*)
@@ -59,7 +70,12 @@ SECTIONS {
 }
 
 ASSERT(_image_start == _sdram_start, "SDRAM image must start at 0xa0000000")
-ASSERT(_text_start == _image_start, "entry text must start the SDRAM image")
+ASSERT(PHASE11_TEXT_PAD >= 0 && PHASE11_TEXT_PAD < 16,
+       "Phase 11 text padding must be in [0, 16)")
+ASSERT((PHASE11_TEXT_PAD & 3) == 0,
+       "Phase 11 text padding must preserve instruction alignment")
+ASSERT(_text_start == _image_start + 16 + PHASE11_TEXT_PAD,
+       "entry text padding differs from PHASE11_TEXT_PAD")
 ASSERT(_image_file_end <= _bss_start, "file image and BSS overlap")
 ASSERT(_bss_end <= _image_end, "BSS extends beyond memory image")
 ASSERT(_image_end <= _heap_end, "SDRAM executable image exceeds capacity")
