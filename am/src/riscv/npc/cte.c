@@ -57,9 +57,22 @@ void yield() {
 #endif
 }
 
+// Both were stubs -- ienabled() hardcoded false and iset() a no-op -- which
+// made cte-context-test fail its `iset(true); assert(ienabled())` before ever
+// reaching its first ecall.  The riscv/ysyxsoc port has done this through
+// mstatus.MIE since it was written and ysyxsoc-cte-context-test passes with
+// it; this brings the npc port in line so the same test can run under npc's
+// own standalone difftest, where it is what makes mepc and mcause comparable.
 bool ienabled() {
-  return false;
+  uintptr_t mstatus;
+  asm volatile("csrr %0, mstatus" : "=r"(mstatus));
+  return (mstatus & (1u << 3)) != 0;
 }
 
 void iset(bool enable) {
+  uintptr_t mstatus;
+  asm volatile("csrr %0, mstatus" : "=r"(mstatus));
+  if (enable) mstatus |= 1u << 3;
+  else mstatus &= ~(1u << 3);
+  asm volatile("csrw mstatus, %0" : : "r"(mstatus));
 }
