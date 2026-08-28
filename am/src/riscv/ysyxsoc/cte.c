@@ -41,7 +41,11 @@ Context *kcontext(Area stack, void (*entry)(void *), void *arg) {
 }
 
 void yield(void) {
+#ifdef __riscv_e
   asm volatile("li a5, -1; ecall");
+#else
+  asm volatile("li a7, -1; ecall");
+#endif
 }
 
 bool ienabled(void) {
