@@ -3,7 +3,7 @@ include $(AM_HOME)/scripts/isa/riscv.mk
 YSYXSOC_LINKER_SCRIPT := linker-sdram-exec.ld
 include $(AM_HOME)/scripts/platform/ysyxsoc.mk
 
-COMMON_CFLAGS += -march=rv32i_zicsr_zifencei -mabi=ilp32 \
+COMMON_CFLAGS += -march=rv32im_zicsr_zifencei -mabi=ilp32 \
                  -DYSYXSOC_REPORT_MEMORY_LAYOUT=1
 LDFLAGS       += -melf32lriscv
 YSYXSOC_TEXT_PAD ?= 0
